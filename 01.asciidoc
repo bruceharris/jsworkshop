@@ -1,0 +1,486 @@
+= JavaScript I - Variables, Functions, and Scope
+Bruce Harris, 7/31/12
+
+== Content and Target Audience
+
+Emphasis on behavior/syntax specific to JavaScript (as compared to other languages).
+
+JavaScript experience not required, but
+you have experience programming in a C style language.
+
+Output of code snippet below is obvious to you.
+
+[source,js]
+----
+var i;
+for (i = 0; i < 10; i++) {
+    if (i % 2 == 0) {
+        document.writeln(i); // document.writeln is a printing function
+    }
+    else {
+        document.writeln(", ");
+    }
+}
+----
+
+== Resources and Tools
+
+* These slides: link:http://bruceharris.net/techtalks/[http://bruceharris.net/techtalks]
+* Sandbox: link:http://codepen.io/pen[CodePen]
+* Reference: link:https://developer.mozilla.org/en/JavaScript/[Mozilla Developer Network]
+* Instruction (online book): link:http://eloquentjavascript.net/contents.html[Eloquent JavaScript]
+
+== Not as I do...
+
+Avoid +document.writeln()+ - not useful in real life, but useful for examples
+
+== The +var+ keyword 
+
+[source,js]
+----
+var x = 1;
+document.writeln(x);
+----
+
+== Is +var+ Optional?
+
+[source,js]
+----
+x = 1; // hmmmmmm.....
+document.writeln(x);
+----
+
+[role="incremental"]
+Above code works, but is *evil*. Assigning variables without declaration using
++var+ creates _global_ variables regardless of where they are declared (this is
+usually a very bad thing).
+
+== The +typeof+ operator
+
+[source,js]
+----
+var x = 1, s = "hello";
+document.writeln(typeof x);
+document.writeln(typeof s);
+----
+
+== Dynamic Typing
+
+[source,js]
+----
+var x = 1;
+document.writeln(typeof x);
+
+x = "hello";  // can we change a number to a string?
+document.writeln(typeof x);
+
+x = 1.1;      // is a decimal different from an integer?
+document.writeln(typeof x);
+----
+
+== Function Statement
+
+[source,js]
+----
+function print(x){
+    document.writeln(x + '<br>');
+} // note no semicolon
+print("hello");
+print("world");
+----
+
+== Function Expression
+
+[source,js]
+----
+// anonymous function
+function (x) {
+    document.writeln(x + '<br>');
+};
+----
+
+== Functions as link:http://en.wikipedia.org/wiki/First-class_citizen[First Class Citizens]
+
+[source,js]
+----
+// capture function in variable
+var print = function (x) {
+    document.writeln(x + '<br>');
+};
+print("hello");
+print("world");
+----
+
+== Passing a Function as an Argument to Another Function
+
+[source,js]
+----
+var print = function (x) {
+    document.writeln(x + '<br>');
+};
+var italic = function (x) {
+    return '<em>' + x + '</em>';
+};
+function callFunc(fn, arg){
+    fn(arg);
+}
+
+callFunc(print, "hello");
+print(italic("world"));
+----
+
+== Returning a function from a function
+
+[source,js]
+----
+var print = function (x) {
+    document.writeln(x + '<br>');
+};
+var italic = function (x) {
+    return '<em>' + x + '</em>';
+};
+function makeCompoundFunction(outer, inner){
+    return function(arg){
+        outer(inner(arg));
+    }
+}
+var printItalic = makeCompoundFunction(print, italic);
+
+print("hello");
+printItalic("world");
+----
+
+== Block Scope v. Function Scope
+
+Most C style languages have _block_ scope.
+
+[source,js]
+----
+var x = 1;
+if (true) {
+    var x = 2; // did we change x or create a new x?
+    document.writeln(x);
+}
+document.writeln(x);
+----
+
+== Function Scope
+
+JavaScript _does not have block scope_, it has only _function scope_
+
+[source,js]
+----
+var x = 1;
+function f() {
+    var x = 2; // did we change x or create a new x?
+    document.writeln(x);
+}
+document.writeln(x);
+f();
+document.writeln(x);
+----
+
+== Lexical Scoping v. Dynamic Scoping
+
+Most C style languages have
+link:http://en.wikipedia.org/wiki/Scope_(computer_science)#Lexical_scoping_and_dynamic_scoping[Lexical Scoping].
+So does JavaScript.
+
+[role="incremental"]
+* Every function creates its own scope environment
+* Variables declared inside a function are... 
+** visible everywhere inside that function
+** not visible outside that function
+* Variables (or functions) declared outside of any function are _global_
+
+[role="incremental"]
+More specifically...
+
+[role="incremental"]
+* In JavaScript functions can be nested inside other functions
+* A function has access to the scope environment of its parent function(s)
+* Thus, variables declared inside a function are visible inside functions nested inside the same function
+
+[role="incremental"]
+Closure
+
+[role="incremental"]
+* Scope environment created by a function can persist even after function finishes executing
+
+== Declare x in global scope
+
+[source,js]
+----
+var x = 1;
+
+function f(){
+    x = 2;
+    document.writeln(x);
+}
+document.writeln(x);
+f();
+document.writeln(x);
+----
+
+== Declare x in function scope
+
+[source,js]
+----
+
+function f(){
+    var x = 2;
+}
+f();
+document.writeln(x); // will this work?
+----
+
+== Declare x in global scope and in function scope
+
+[source,js]
+----
+var x = 1;
+
+function f(){
+    var x = 2;
+    document.writeln(x);
+}
+document.writeln(x);
+f();
+document.writeln(x);
+----
+
+== Declare x in global scope and as function parameter
+
+[source,js]
+----
+var x = 1;
+
+function f(x){
+    x = 2;
+    document.writeln(x);
+}
+document.writeln(x);
+f();
+document.writeln(x);
+----
+
+== Reference x in function scope without +var+ keyword
+
+[source,js]
+----
+function f(){
+    x = 2; // is this a good idea?
+    document.writeln(x);
+}
+f();
+document.writeln(x); // will this work?
+----
+
+== Declare nested function and call it outside
+
+[source,js]
+----
+var x = 1;
+
+function f1(){
+    var x = 2;
+    function f2(){
+        document.writeln(x);
+    }
+}
+f2(); // will this work?
+document.writeln(x);
+----
+
+== Declare nested function and call it inside
+
+[source,js]
+----
+var x = 1;
+
+function f1(){
+    var x = 2;
+    function f2(){
+        document.writeln(x);
+    }
+    f2();
+}
+document.writeln(x);
+f1();
+document.writeln(x);
+----
+
+== Closure
+
+Environment created by invoking a function persists even after
+function is finished executing.
+
+[source,js]
+----
+function makeAccumulator(){
+    var x = 0;
+    return function (n) {
+	x += n;
+        return x;
+    };
+}
+var accum = makeAccumulator();
+document.writeln(accum(5));
+document.writeln(accum(4));
+document.writeln(accum(13));
+----
+
+== Closure creates a new persistent environment
+
+[source,js]
+----
+function makeAccumulator(){
+    var x = 0;
+    return function (n) {
+	x += n;
+        return x;
+    };
+}
+var accum1 = makeAccumulator();
+document.writeln(accum1(5));
+document.writeln(accum1(4));
+
+var accum2 = makeAccumulator();
+document.writeln(accum2(23));
+document.writeln(accum2(17));
+----
+
+== Function Hoisting
+
+*Most important difference* between function statements and function expressions:
+
+Function statements are "hoisted" to the top of the scope in
+which they appear.  Regardless of where they appear within a scope environment,
+it is as if they were declared at the top of that scope environment.
+
+Function expressions are _not_ hoisted.
+
+[source,js]
+----
+var f1;
+f1(); // can we call f1 before function expression assignment?
+f1 = function () {
+    document.writeln(1);
+};
+
+f2(); // can we call f2 before its declaration via function statement?
+function f2(){
+    document.writeln(2);
+}
+----
+
+== Function expressions are _not_ hoisted
+
+[source,js]
+----
+var f;
+f = function () { return 2; };
+document.writeln(f());
+
+f = function () { return 1; };
+document.writeln(f());
+----
+
+== Hoisting can cause unintuitive behavior
+
+[source,js]
+----
+var f;
+f = function(){ return 2; };
+document.writeln(f());
+
+function f(){ return 1 }
+document.writeln(f()); // did we re-assign f?
+----
+
+== Immediate function
+
+[source,js]
+----
+(function(){
+    var s = "cool, no global variables!";
+    document.writeln(s);
+})(); // anonymous function invoked immediately
+----
+
+== Exercise 1
+
+[source,js]
+----
+function makeAdder(x){
+    // your code here
+}
+
+var add7 = makeAdder(7);
+document.writeln(add7(4)); // 11
+document.writeln(add7(9)); // 16
+
+var add3 = makeAdder(3);
+document.writeln(add3(6)); // 9
+document.writeln(add3(2)); // 5
+----
+
+== Exercise 2
+
+Not practical, but a good exercise in functional programming
+
+[source,js]
+----
+var sum1 = (
+    // your code here
+);
+document.writeln(sum1(3, 4)());  // 7
+
+var sum2 = (
+    // your code here
+);
+document.writeln(sum2()(3, 4));  // 7
+----
+
+== Exercise 3
+
+[source,js]
+----
+function makeCounter(start, increment){
+    // your code here
+}
+
+var counter1 = makeCounter(100, 1);
+document.writeln(counter1()); // 100
+document.writeln(counter1()); // 101
+
+var counter2 = makeCounter(10, 5);
+document.writeln(counter2()); // 10
+document.writeln(counter2()); // 15 
+----
+
+== Exercise 4
+
+[source,js]
+----
+function add(x, y){
+    return x + y;
+}
+function subtract(x, y){
+    return x - y;
+}
+// operation is either '+' or '-'
+function makeReducer(operation){
+    // your code here, preferably just one line
+}
+
+var plus = makeReducer('+');
+document.writeln(plus(4, 5)); // 9
+
+var minus = makeReducer('-');
+document.writeln(minus(4, 5)); // -1
+----
+
+== Exercise 5
+
+Modify solution to Exercise 4 to remove +add+ and +subtract+ from the global scope

@@ -1,0 +1,307 @@
+= JavaScript IV - Object Inheritance and The Prototype Chain
+Bruce Harris, 8/9/12
+
+== Content and target audience
+
+*JavaScript IV - Object Inheritance and The Prototype Chain*
+
+Advanced object oriented programing in JavaScript.
+
+You are familiar with basics of functional programming and working with
+objects in JavaScript, as well as constructor functions
+(covered in
+link:http://bruceharris.net/techtalks[JavaScript I - Variables, Functions, and Scope], 
+link:http://bruceharris.net/techtalks[JavaScript II - Objects, Arrays, and Booleans], and
+link:http://bruceharris.net/techtalks[JavaScript III - Constructor Functions and the +this+ Keyword])
+
+== Resources and tools
+
+* These slides: link:http://bruceharris.net/techtalks/[http://bruceharris.net/techtalks]
+* Sandboxes: link:http://codepen.io/pen[CodePen], link:http://jsfiddle.net/[JSFiddle], link:http://jsbin.com/[JS Bin]
+* Use your browser's debugger / developer tools
+* Reference: link:https://developer.mozilla.org/en/JavaScript/[Mozilla Developer Network]
+* Instruction (online book): link:http://eloquentjavascript.net/contents.html[Eloquent JavaScript]
+
+== Not as I do...
+
+Avoid +document.writeln()+ - not useful in real life, but useful for examples
+
+== prototype
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+var a = new A;
+document.writeln(a.x);
+----
+
+== prototype
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+A.prototype.y = 2;
+var a = new A;
+document.writeln(a.x);
+document.writeln(a.y);
+----
+
+== prototype
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+var a = new A;
+document.writeln(a.x);
+A.prototype.y = 2;
+document.writeln(a.y);
+----
+
+== hasOwnProperty
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+var a = new A;
+document.writeln(a.hasOwnProperty('x'));
+A.prototype.y = 2;
+document.writeln(a.hasOwnProperty('y'));
+----
+
+== "Shining Through"
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+var a = new A;
+A.prototype.y = 2;
+document.writeln(a.y);
+a.y = 3;
+document.writeln(a.y);
+----
+
+== "Shining Through"
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+var a = new A;
+A.prototype.y = 2;
+document.writeln(a.y);
+a.y = 3;
+document.writeln(a.y);
+delete a.y;
+document.writeln(a.y);
+----
+
+== Adding methods to prototype
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+A.prototype.increment = function(){
+    this.x++;
+};
+var a = new A;
+document.writeln(a.x);
+a.increment();
+document.writeln(a.x);
+----
+
+== Adding methods to prototype
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+A.prototype.increment = function(){
+    this.x++;
+};
+var a = new A;
+document.writeln(a.x);
+a.increment();
+document.writeln(a.x);
+
+var a2 = new A;
+document.writeln(a2.x);
+a2.increment();
+document.writeln(a2.x);
+----
+
+== Inheritance
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+A.prototype.increment = function(){
+    this.x++;
+}
+function B(){
+    this.y = 2;
+}
+B.prototype = new A;
+var b = new B;
+document.writeln('y' in b);
+document.writeln('x' in b);
+document.writeln('increment' in b);
+----
+
+== Inheritance
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+A.prototype.increment = function(){
+    this.x++;
+}
+function B(){
+    this.y = 2;
+}
+B.prototype = new A;
+var b = new B;
+b.increment();
+document.writeln(b.x);
+----
+
+== Inheritance
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+A.prototype.increment = function(){
+    this.x++;
+}
+function B(){
+    this.y = 2;
+}
+B.prototype = new A;
+var b = new B;
+document.writeln(b.hasOwnProperty('x'));
+b.increment();
+document.writeln(b.hasOwnProperty('x'));
+----
+
+== Inheritance
+
+[source,js]
+----
+var o = {
+    a: 1 
+};
+document.writeln('a' in o);
+document.writeln('b' in o);
+document.writeln('toString' in o);
+----
+
+== Inheritance
+
+[source,js]
+----
+var o = {
+    a: 1 
+};
+document.writeln('a' in o);
+document.writeln('b' in o);
+document.writeln('toString' in o);
+document.writeln(o.hasOwnProperty('toString'));
+----
+
+== Inheritance
+
+[source,js]
+----
+document.writeln(Object.prototype.hasOwnProperty('toString'));
+----
+
+== Modifying native prototypes
+
+[source,js]
+----
+Number.prototype.plus1 = function(){
+    return this+1;
+};
+document.writeln((45).plus1());
+----
+
+== Modifying native prototypes
+
+[source,js]
+----
+document.writeln("bing".toString());
+
+String.prototype.toString = function(){
+    return this + 'o';
+}
+document.writeln("bing".toString());
+----
+
+== Borrowing methods of another constructor's prototype
+
+[source,js]
+----
+var notArray = {0: 'a', 1: 'b', length: 2};
+notArray.push(3);
+----
+
+== Borrowing methods of another constructor's prototype
+
+[source,js]
+----
+var notArray = {0: 'a', 1: 'b', length: 2};
+Array.prototype.push.apply(notArray, ['c'])
+document.writeln(notArray.length);
+document.writeln(notArray[2]);
+----
+
+== The prototype _chain_
+
+[source,js]
+----
+function A(){
+    this.x = 1;
+}
+A.prototype.x = 2;
+
+function B(){
+    this.x = 3;
+}
+B.prototype = new A;
+
+function C(){
+    this.x = 4;
+}
+C.prototype = new B;
+
+var c = new C;
+
+document.writeln(c.x)
+delete(c.x);
+document.writeln(c.x)
+delete(C.prototype.x);
+document.writeln(c.x)
+delete(B.prototype.x);
+document.writeln(c.x)
+delete(A.prototype.x);
+document.writeln(c.x)
+----

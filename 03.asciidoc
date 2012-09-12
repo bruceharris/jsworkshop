@@ -1,0 +1,500 @@
+= JavaScript III - Constructor Functions and the +this+ Keyword
+Bruce Harris, 8/7/12
+
+== Content and target audience
+
+*JavaScript III - Constructor Functions and the +this+ Keyword*
+
+Digging into object oriented programing in JavaScript.
+
+Prototypes and  object inheritance will be covered in later talks.
+
+You are familiar with basics of functional programming and working with
+objects in JavaScript
+(covered in
+link:http://bruceharris.net/techtalks[JavaScript I - Variables, Functions, and Scope] and 
+link:http://bruceharris.net/techtalks[JavaScript II - Objects, Arrays, and Booleans])
+
+== Resources and tools
+
+* These slides: link:http://bruceharris.net/techtalks/[http://bruceharris.net/techtalks]
+* Sandboxes: link:http://codepen.io/pen[CodePen], link:http://jsfiddle.net/[JSFiddle], link:http://jsbin.com/[JS Bin]
+* Use your browser's debugger / developer tools
+* Reference: link:https://developer.mozilla.org/en/JavaScript/[Mozilla Developer Network]
+* Instruction (online book): link:http://eloquentjavascript.net/contents.html[Eloquent JavaScript]
+
+== Not as I do...
+
+Avoid +document.writeln()+ - not useful in real life, but useful for examples
+
+== The +this+ keyword
+
+*What does it mean?*
+
+== +this+ in global scope
+
+[source,js]
+----
+document.writeln(x);
+
+this.x = 1;
+document.writeln(x);
+
+window.x = 2;
+document.writeln(this.x);
+
+document.writeln(this === window);
+----
+
+== +this+ in functions
+
+[source,js]
+----
+document.writeln(x);
+this.x = 1;
+document.writeln(x);
+
+function f(){
+    document.writeln(this.x);
+    this.x = 2;
+    document.writeln(this.x);
+}
+f();
+document.writeln(this.x);
+
+window.x = 3;
+document.writeln(this.x);
+----
+
+== +this+ in functions
+
+[source,js]
+----
+this.x = 1;
+
+function f(){
+    document.writeln(this.x);
+    this.x = 3;
+}
+var o = {
+    x: 2,
+    m: f
+};
+document.writeln(this.x);
+document.writeln(o.x);
+f();
+document.writeln(this.x);
+document.writeln(o.x);
+----
+
+== +this+ in function invoked as _method_
+
+[source,js]
+----
+this.x = 1;
+
+function f(){
+    document.writeln(this.x);
+    this.x = 3;
+}
+var o = {
+    x: 2,
+    m: f
+};
+document.writeln(this.x);
+document.writeln(o.x);
+o.m();
+document.writeln(this.x);
+document.writeln(o.x);
+----
+
+== +this+ in function invoked as _method_
+
+[source,js]
+----
+var y = 1;
+var o = {
+    x: 2,
+    m: function(){
+        this.y = 3;
+    }
+};
+document.writeln(o.x + '|' + o.y);
+o.m();
+document.writeln(o.x + '|' + o.y);
+document.writeln(this.y);
+----
+
+== +this+ in function invoked as _method_
+
+[source,js]
+----
+var x = 1;
+var f = function(){
+    this.x += 10;
+};
+var o = {
+    x: 2,
+    o: { x: 3 }
+};
+o.m = f;
+o.o.m = f;
+
+document.writeln(x + '|' + o.x + '|' + o.o.x);
+f();
+document.writeln(x + '|' + o.x + '|' + o.o.x);
+o.m();
+document.writeln(x + '|' + o.x + '|' + o.o.x);
+o.o.m();
+document.writeln(x + '|' + o.x + '|' + o.o.x);
+----
+
+== Function invocation patterns seen thus far...
+
+* function: +f();+
+* method: +o.f();+
+
+== Constructor functions and the +new+ operator
+
+[source,js]
+----
+function C(){
+    this.x = 2;
+}
+var a = new C;
+document.writeln(a.x);
+----
+
+== Constructor functions and the +new+ operator
+
+[source,js]
+----
+function C(){
+    // var this = {};
+    this.x = 2;
+    // return this;
+}
+var a = new C;
+document.writeln(a.x);
+----
+
+== Constructor functions and the +new+ operator
+
+[source,js]
+----
+function C(){
+    this.x = 2;
+}
+var a = new C();
+document.writeln(a.x);
+----
+
+== Constructor functions and the +new+ operator
+
+[source,js]
+----
+function C(){
+    this.x = 2;
+}
+var a = C();
+document.writeln(a.x);
+----
+
+== Constructor functions and the +new+ operator
+
+[source,js]
+----
+var x = 1;
+function C(){
+    this.x = 2;
+}
+var a = C();
+document.writeln(x);
+document.writeln(a);
+----
+
+== Function invocation patterns seen thus far...
+
+* function: +f();+
+* method: +o.f();+
+* constructor: +x = new F;+ or +x = new F();+
+
+== Function invocation patterns seen thus far...
+
+[source,js]
+----
+var x = 1;
+function C(){
+    this.x = 2;
+}
+var o = {
+    x: 3,
+    m: C
+};
+var a = new C;
+document.writeln(x + '|' + o.x + '|' + a.x);
+o.m();
+document.writeln(x + '|' + o.x + '|' + a.x);
+C();
+document.writeln(x + '|' + o.x + '|' + a.x);
+----
+
+== Functions are objects
+
+[source,js]
+----
+function f(){
+    document.writeln(f.y);
+    if (typeof f.z === 'function') f.z();
+    document.writeln('<hr>');
+}
+f();
+f.y = 1;
+f();
+f.z = function(){
+    document.writeln(2);
+}
+f();
+----
+
+== +apply+ function invocation pattern
+
+[source,js]
+----
+function f(){
+    this.x = 1;
+}
+var o = { x: 2 };
+f.apply(o);
+document.writeln(o.x);
+----
+
+== +apply+ function invocation pattern
+
+[source,js]
+----
+var o1 = {
+    x: 1,
+    m: function f(){
+        this.x = 2;
+    }
+};
+var o2 = { x: 3 };
+o1.m.apply(o2);
+document.writeln(o1.x);
+document.writeln(o2.x);
+----
+
+== Passing arguments with +apply+
+
+[source,js]
+----
+function f(_x, _y){
+    this.x = _x;
+    this.y = _y;
+}
+var o = {
+    x: 1,
+    y: 2
+};
+document.writeln(o.x + '|' + o.y);
+f.apply(o, [3, 4]);
+document.writeln(o.x + '|' + o.y);
+----
+
+== +call+ is similar to +apply+
+
+[source,js]
+----
+function f(_x, _y){
+    this.x = _x;
+    this.y = _y;
+}
+var o = {
+    x: 1,
+    y: 2
+};
+document.writeln(o.x + '|' + o.y);
+f.call(o, 3, 4);
+document.writeln(o.x + '|' + o.y);
+----
+
+== Contexts affecting meaning of +this+ (comprehensive list)
+
+[horizontal]
+In global scope:: global object
+
+*In functions - depends on invocation pattern*
+
+[horizontal]
+function:: global object
+method:: object the function is a method of
+constructor:: new object returned by constructor
++apply+ or +call+:: the specified object
+
+== Objects with methods and private variables
+
+[source,js]
+----
+function makeCounter(){
+    var count = 0;
+    function reset(newCount){
+        count = newCount || 0; 
+    }
+    function current(){
+        return count;
+    }
+    return {
+        reset: reset,
+        current: current,
+        increment: function (amount) {
+            if (typeof amount === 'undefined') amount = 1;
+            count += amount;
+        }
+    };
+}
+----
+
+== Objects with methods operating on public properties
+
+[source,js]
+----
+function Counter(){
+    this.count = 0;
+    this.reset = function (newCount) {
+        this.count = newCount || 0; 
+    };
+    this.increment = function (amount) {
+        if (typeof amount === 'undefined') amount = 1;
+        this.count += amount;
+    }
+}
+
+var c = new Counter;
+document.writeln(c.count);
+
+c.increment(2);
+document.writeln(c.count);
+
+c.reset();
+document.writeln(c.count);
+----
+
+== Method chaining
+
+[source,js]
+----
+function Counter(){
+    this.count = 0;
+    this.reset = function (newCount) {
+        this.count = newCount || 0; 
+        return this;
+    };
+    this.increment = function (amount) {
+        if (typeof amount === 'undefined') amount = 1;
+        this.count += amount;
+        return this;
+    }
+}
+var c = new Counter;
+document.writeln(c.count);
+document.writeln(c.increment().count);
+document.writeln(c.reset().count);
+document.writeln(c.reset(5).increment(10).count);
+document.writeln(c.count);
+----
+
+== Exercise 1
+
+[source,js]
+----
+function Customer(name, account){
+    /****
+      your code here
+
+      Customer is a constructor function
+
+      customer object has...
+       - a public name property containing the customer's name
+       - a public account property containing the customer's account number
+       - a public orders property containing the customer's orders (as an array)
+       - info about orders directly accessible via the orders property
+       - an addOrder method that takes 1 argument: order number
+     */
+}
+
+var bob = new Customer('Bob', 5673);
+document.writeln(bob.account); // 5673
+bob.addOrder(90023);
+document.writeln(bob.orders); // [90023]
+bob.addOrder(90028);
+document.writeln(bob.orders); // [90023, 90028]
+----
+
+== Exercise 2
+
+[source,js]
+----
+function HTMLformatter(content){
+    // your code here
+    // HTMLformatter is a constructor function
+}
+var s = new HTMLformatter("hi");
+document.writeln(s.text);               // hi
+s.text = "hello";
+document.writeln(s.bold());             // <strong>hello</strong>
+document.writeln(s.italic());           // <em>hello</em>
+document.writeln(s.bold().italic());    // <em><strong>hello</strong></em>
+----
+
+== Exercise 3
+
+Rudimentary inheritance - objects that share methods
+
+[source,js]
+----
+function HTMLformatter(content){
+    // your code here (leave intact from exercise 2)
+}
+// feel free to add code in between / before / after
+function HTMLformatter2(content){
+    // your code here
+    // HTMLformatter2 does everything HTMLformatter does, but adds the box method 
+    // Avoid repeating code for methods already defined in HTMLformatter
+}
+
+var s = new HTMLformatter2("hi");
+document.writeln(s.text);               // hi
+s.text = "hello";
+document.writeln(s.box());              // <div style="border: 1px solid black;">hello</div>
+document.writeln(s.italic().box());     // <div style="border: 1px solid black;"><em>hello</em></div>
+----
+
+== Exercise 4
+
+[source,js]
+----
+function makeCustomer(name, account){
+    /****
+      your code here
+
+      makeCustomer is NOT a constructor function (we do not use the new operator)
+      but accomplishes the same as the constructor function in Exercise 1
+      hint: think about the approach used to create objects in Session II
+
+      customer object has...
+       - a public name property containing the customer's name
+       - a public account property containing the customer's account number
+       - a public orders property containing the customer's orders (as an array)
+       - info about orders directly accessible via the orders property
+       - an addOrder method that takes 1 argument: order number
+     */
+}
+
+var bob = makeCustomer('Bob', 5673);
+document.writeln(bob.account); // 5673
+bob.addOrder(90023);
+document.writeln(bob.orders); // [90023]
+bob.addOrder(90028);
+document.writeln(bob.orders); // [90023, 90028]
+----
